@@ -11,7 +11,7 @@ st.info("支援長篇電報，自動過濾雜訊。目前 ULD 顯示格式已優
 # 側邊欄：顯示邏輯說明
 with st.sidebar:
     st.header("🛠️ 處理邏輯")
-    st.write("1. **開關制過濾**：自動剔除 COR/OSI/OCI 及其下方描述。")
+    st.write("1. **過濾條件**：自動剔除 COR/OSI/OCI 及其下方描述。")
     st.write("2. **精準計數**：自動剔除跨頁重複的 ULD 與 AWB。")
     st.write("3. **格式精修**：ULD 僅保留到盤號後的斜線，其餘刪除。")
 
