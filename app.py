@@ -3,7 +3,7 @@ from docx import Document
 import io
 
 # 網頁標題與分頁設定
-st.set_page_config(page_title="FFM 金牌處理器 V2", page_icon="✈️", layout="wide")
+st.set_page_config(page_title="FFM金牌處理器", page_icon="✈️", layout="wide")
 
 st.title("✈️ FFM 電報自動清理與數據分析")
 st.info("支援長篇電報（如 72 頁文件），自動過濾雜訊並精確統計裝備與提單。")
