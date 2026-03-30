@@ -63,9 +63,9 @@ if uploaded_file is not None:
     st.subheader("📊 數據統計結果")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("獨立 ULD 裝備總數", len(uld_set))
+        st.metric(" ULD 裝備總數", len(uld_set))
     with col2:
-        st.metric("獨立主提單筆數", len(awb_set))
+        st.metric("主提單票數", len(awb_set))
     with col3:
         st.metric("清理後總行數", len(cleaned_lines))
 
