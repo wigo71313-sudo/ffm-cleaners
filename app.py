@@ -13,7 +13,7 @@ with st.sidebar:
     st.header("🛠️ 處理邏輯")
     st.write("1. **開關制過濾**：自動剔除 COR/OSI/OCI 及其下方描述。")
     st.write("2. **精準計數**：自動剔除跨頁重複的 ULD 與 AWB。")
-    st.write("3. **保留細節**：完整保留 020- 下方的商品描述行。")
+    st.write("3. **保留細節**：完整保留 020- SCI 代碼。")
 
 # 上傳元件
 uploaded_file = st.file_uploader("請上傳 FFM Word 檔案 (.docx)", type="docx")
