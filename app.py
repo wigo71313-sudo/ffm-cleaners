@@ -3,7 +3,7 @@ from docx import Document
 import io
 
 # 網頁標題與分頁設定
-st.set_page_config(page_title="FFM金牌處理器", page_icon="✈️", layout="wide")
+st.set_page_config(page_title="FFM 金牌處理器 V2.1", page_icon="✈️", layout="wide")
 
 st.title("✈️ FFM 電報自動清理與數據分析")
 st.info("支援長篇電報（如 72 頁文件），自動過濾雜訊並精確統計裝備與提單。")
@@ -13,7 +13,7 @@ with st.sidebar:
     st.header("🛠️ 處理邏輯")
     st.write("1. **開關制過濾**：自動剔除 COR/OSI/OCI 及其下方描述。")
     st.write("2. **精準計數**：自動剔除跨頁重複的 ULD 與 AWB。")
-    st.write("3. **保留細節**：完整保留 020- SCI 代碼。")
+    st.write("3. **格式優化**：ULD 清單僅保留『編號』，去除重量與體積雜訊。")
 
 # 上傳元件
 uploaded_file = st.file_uploader("請上傳 FFM Word 檔案 (.docx)", type="docx")
@@ -42,11 +42,21 @@ if uploaded_file is not None:
         if not is_deleting:
             cleaned_lines.append(line)
     
-    # --- 數據精準統計區 ---
-    # 1. 提取所有 ULD 編號並去重 (Unique ULDs)
-    uld_set = set([l for l in cleaned_lines if l.startswith('ULD/')])
+    # --- 數據精準統計與格式化區 ---
+    # 1. 提取所有 ULD 編號並優化格式 (僅保留 ULD/XXXXXXXXXX)
+    uld_clean_list = []
+    for l in cleaned_lines:
+        if l.startswith('ULD/'):
+            # 透過斜線與空格切割，只抓取盤號主體
+            parts = l.split('/')
+            if len(parts) >= 2:
+                # 取得盤號並去除後方所有資訊 (如 W-1550...)
+                uld_id = parts[1].split()[0] 
+                uld_clean_list.append(f"ULD/{uld_id}")
     
-    # 2. 提取所有提單號碼 (前 12 碼，例如 020-12345678) 並去重 (Unique AWBs)
+    uld_set = set(uld_clean_list) # 執行去重
+    
+    # 2. 提取所有提單號碼 (前 12 碼) 並去重
     awb_set = set([l[:12] for l in cleaned_lines if l.startswith('020-')])
     
     # 顯示數據儀表板
@@ -63,7 +73,7 @@ if uploaded_file is not None:
     result_text = "\n".join(cleaned_lines)
     st.divider()
     st.download_button(
-        label="📥 下載清理後的 TXT 檔案 (Gold Standard)",
+        label="📥 下載清理後的 TXT 檔案",
         data=result_text,
         file_name="Cleaned_FFM_Result.txt",
         mime="text/plain",
@@ -71,7 +81,8 @@ if uploaded_file is not None:
     )
 
     # 預覽詳細內容
-    with st.expander("🔍 檢視獨立 ULD 清單"):
+    with st.expander("🔍 檢視獨立 ULD 清單 (已簡化格式)"):
+        # 排序後顯示，方便核對
         st.write(sorted(list(uld_set)))
         
     with st.expander("🔍 檢視清理後的文字預覽"):
