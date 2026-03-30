@@ -3,17 +3,17 @@ from docx import Document
 import io
 
 # 網頁標題與分頁設定
-st.set_page_config(page_title="FFM 金牌處理器 V2.1", page_icon="✈️", layout="wide")
+st.set_page_config(page_title="FFM 金牌處理器 V2.2", page_icon="✈️", layout="wide")
 
 st.title("✈️ FFM 電報自動清理與數據分析")
-st.info("支援長篇電報（如 72 頁文件），自動過濾雜訊並精確統計裝備與提單。")
+st.info("支援長篇電報，自動過濾雜訊。目前 ULD 顯示格式已優化為：ULD/XXXXXXXXXX/")
 
 # 側邊欄：顯示邏輯說明
 with st.sidebar:
     st.header("🛠️ 處理邏輯")
     st.write("1. **開關制過濾**：自動剔除 COR/OSI/OCI 及其下方描述。")
     st.write("2. **精準計數**：自動剔除跨頁重複的 ULD 與 AWB。")
-    st.write("3. **格式優化**：ULD 清單僅保留『編號』，去除重量與體積雜訊。")
+    st.write("3. **格式精修**：ULD 僅保留到盤號後的斜線，其餘刪除。")
 
 # 上傳元件
 uploaded_file = st.file_uploader("請上傳 FFM Word 檔案 (.docx)", type="docx")
@@ -21,7 +21,6 @@ uploaded_file = st.file_uploader("請上傳 FFM Word 檔案 (.docx)", type="docx
 if uploaded_file is not None:
     # 讀取 Word 檔案內容
     doc = Document(uploaded_file)
-    # 讀取所有段落並過濾掉純空行
     raw_lines = [para.text.strip() for para in doc.paragraphs if para.text.strip()]
     
     cleaned_lines = []
@@ -43,16 +42,16 @@ if uploaded_file is not None:
             cleaned_lines.append(line)
     
     # --- 數據精準統計與格式化區 ---
-    # 1. 提取所有 ULD 編號並優化格式 (僅保留 ULD/XXXXXXXXXX)
+    # 1. 提取所有 ULD 編號並優化格式 (保留到 ULD/XXXXXXXXXX/)
     uld_clean_list = []
     for l in cleaned_lines:
         if l.startswith('ULD/'):
-            # 透過斜線與空格切割，只抓取盤號主體
             parts = l.split('/')
             if len(parts) >= 2:
-                # 取得盤號並去除後方所有資訊 (如 W-1550...)
+                # 取得盤號主體並去除空格後的資訊
                 uld_id = parts[1].split()[0] 
-                uld_clean_list.append(f"ULD/{uld_id}")
+                # 重新組合，尾端補上斜線
+                uld_clean_list.append(f"ULD/{uld_id}/")
     
     uld_set = set(uld_clean_list) # 執行去重
     
@@ -63,9 +62,9 @@ if uploaded_file is not None:
     st.subheader("📊 數據統計結果")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(" ULD 裝備總數", len(uld_set))
+        st.metric("獨立 ULD 裝備總數", len(uld_set))
     with col2:
-        st.metric("主提單票數", len(awb_set))
+        st.metric("獨立主提單筆數", len(awb_set))
     with col3:
         st.metric("清理後總行數", len(cleaned_lines))
 
@@ -81,8 +80,8 @@ if uploaded_file is not None:
     )
 
     # 預覽詳細內容
-    with st.expander("🔍 檢視獨立 ULD 清單 (已簡化格式)"):
-        # 排序後顯示，方便核對
+    with st.expander("🔍 檢視獨立 ULD 清單 (格式：ULD/盤號/)"):
+        # 排序後顯示
         st.write(sorted(list(uld_set)))
         
     with st.expander("🔍 檢視清理後的文字預覽"):
